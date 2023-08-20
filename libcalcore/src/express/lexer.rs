@@ -65,8 +65,7 @@ pub fn get_token(expr_str: &str) -> Result<Vec<Token>, LexerError> {
 }
 
 fn parse_num(str: &str) -> Result<f64, LexerError> {
-    match str.parse::<f64>() {
-        Ok(fnum) => Ok(fnum),
-        Err(_) => Err(LexerError::InvalidNumber(str.to_string())),
-    }
+    str.parse::<f64>().map_err(|_e| {
+        LexerError::InvalidNumber(str.to_string())
+    })
 }

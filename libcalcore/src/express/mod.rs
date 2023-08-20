@@ -2,11 +2,6 @@ pub mod error;
 pub mod lexer;
 pub mod parser;
 
-pub enum Either<L, R> {
-    Left(L),
-    Right(R),
-}
-
 #[cfg(test)]
 pub mod tests {
 
@@ -42,8 +37,6 @@ pub mod tests {
             let parser_res = Parser::parse_token(lexer);
 
             if let Ok(parser) = parser_res {
-                println!("Parser: [{}]", parser);
-
                 let cal_res = parser.calculate();
 
                 println!("Calculator: [{:?}]", cal_res);
