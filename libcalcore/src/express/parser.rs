@@ -41,7 +41,10 @@ impl Display for Node {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self.children.len() {
             0 => format!("Node {}{:?}{}", '{', self.node_type, '}'),
-            _ => format!("Node {}{:?}, {:?}{}", '{', self.node_type, self.children, '}')
+            _ => format!(
+                "Node {}{:?}, {:?}{}",
+                '{', self.node_type, self.children, '}'
+            ),
         };
         write!(f, "{}", s)
     }
@@ -156,7 +159,8 @@ impl Parser {
     pub fn calculate(&self) -> Result<f64, CalculateError> {
         // keep the precision
         self.root_node.calculate().map(|mut num| {
-            num = (num * 1000000.0).round() / 1000000.0;
+            let percision = 10_i32.pow(8) as f64;
+            num = (num * percision).round() / percision;
             num
         })
     }
@@ -165,8 +169,8 @@ impl Parser {
     /// ```BNF
     /// Expr ::= AddExpr;
     /// AddExpr ::= MulExpr {("+"|"-") AddExpr};
-    /// MulExpr ::= ExponExpr {("*"|"/"|"%") MulExpr};
-    /// ExponExpr ::= UnionExpr {"^" UnionExpr};
+    /// MulExpr ::= ExponExpr {("*"|"/"|"%") ExponExpr};
+    /// ExponExpr ::= UnionExpr | UnionExpr "^" UnionExpr;
     /// UnionExpr ::= PhExpr | UnionOp UnionExpr;
     /// UnionOp ::= "+" | "-";
     /// PhExpr ::= "(" AddExpr ")" | NUMBER;
@@ -213,13 +217,14 @@ impl Parser {
         return Ok(());
     }
 
-    /// MulExpr ::= ExponExpr {("*"|"/"|"%") MulExpr};
+    /// MulExpr ::= ExponExpr {("*"|"/"|"%") ExponExpr};
     fn mul_expr(nodes: &mut Vec<Node>) -> Result<(), ParserError> {
         Self::expon_expr(nodes)?;
         let mut mul_node = Node::new_type(NodeType::MulExpr(OpSymbol::UnKnow));
         mul_node.children.push(nodes[0].clone());
+        nodes[0] = mul_node.clone();
         // check if has symbol that is "*", "/", "%"
-        if let Some(node) = nodes.get(1) {
+        while let Some(node) = nodes.get(1) {
             if let NodeType::Token(token) = &node.node_type {
                 match token {
                     Token::Multiply | Token::Division | Token::Percent => {
@@ -233,14 +238,18 @@ impl Parser {
                         // remove symbol
                         nodes.drain(..=1);
                         // parse next node
-                        Self::mul_expr(nodes)?;
+                        Self::expon_expr(nodes)?;
+                        mul_node.children.push(nodes[0].clone());
+                        // put node in to nodes
+                        nodes[0] = mul_node.clone();
+                        // pack node
+                        mul_node = Node::new_type(NodeType::MulExpr(OpSymbol::UnKnow));
                         mul_node.children.push(nodes[0].clone());
                     }
-                    _ => {}
+                    _ => break,
                 }
             }
         }
-        nodes[0] = mul_node;
         Ok(())
     }
 
@@ -278,15 +287,11 @@ impl Parser {
                         if let Token::Plus = token {
                             union_node
                                 .children
-                                .push(Node::new_type(NodeType::UnionOp(
-                                    OpSymbol::Add,
-                                )))
+                                .push(Node::new_type(NodeType::UnionOp(OpSymbol::Add)))
                         } else if let Token::Minus = token {
                             union_node
                                 .children
-                                .push(Node::new_type(NodeType::UnionOp(
-                                    OpSymbol::Subtract,
-                                )))
+                                .push(Node::new_type(NodeType::UnionOp(OpSymbol::Subtract)))
                         }
                         // remove the symbol
                         nodes.remove(0);

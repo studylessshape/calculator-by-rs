@@ -25,7 +25,7 @@ pub mod tests {
 
     #[test]
     fn test_parser() {
-        let express = "1+(2-3)*4/5%6^7";
+        let express = "1+2/3*4+(1%4)^1.2";
 
         let lexer_res = get_token(express);
 
@@ -35,6 +35,7 @@ pub mod tests {
 
         if let Ok(lexer) = lexer_res {
             let parser_res = Parser::parse_token(lexer);
+            println!("Parser: {:?}", parser_res);
 
             if let Ok(parser) = parser_res {
                 let cal_res = parser.calculate();
@@ -43,7 +44,7 @@ pub mod tests {
 
                 assert!(cal_res.is_ok());
                 if let Ok(cal) = cal_res {
-                    assert_eq!(cal, 0.2);
+                    assert_eq!(cal, 4.66666667);
                 }
             }
         }
