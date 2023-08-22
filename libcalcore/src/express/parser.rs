@@ -1,3 +1,5 @@
+mod lookahead;
+
 use std::fmt::Display;
 
 use super::{

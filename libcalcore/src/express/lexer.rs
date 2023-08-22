@@ -1,3 +1,5 @@
+use std::{str::Chars, iter::Peekable};
+
 use super::error::LexerError;
 
 /// Some section about to the symbols:
@@ -17,55 +19,61 @@ pub enum Token {
     EOF,
 }
 
-pub static NUMBER_STR: &str = "0123456789.";
-pub static OPERATOR_STR: &str = "()+-*/^% \n";
+pub static NUMBER_CHARS: &str = "0123456789.";
+pub static OPERATOR_CHARS: &str = "()+-*/^% \n";
 
-pub fn get_token(expr_str: &str) -> Result<Vec<Token>, LexerError> {
-    let mut tokens = Vec::new();
-
-    let mut stor_str = String::new();
-
-    for ch in expr_str.chars() {
-        // clear the contains of `store string`
-        if OPERATOR_STR.contains(ch) {
-            if stor_str.len() > 0 {
-                match parse_num(&stor_str) {
-                    Ok(num) => tokens.push(Token::Number(num)),
-                    Err(e) => return Err(e),
-                };
-                stor_str.clear();
-            }
-            // push operator symbol
-            match ch {
-                '(' => tokens.push(Token::OpenPh),
-                ')' => tokens.push(Token::ClosePh),
-                '+' => tokens.push(Token::Plus),
-                '-' => tokens.push(Token::Minus),
-                '*' => tokens.push(Token::Multiply),
-                '/' => tokens.push(Token::Division),
-                '^' => tokens.push(Token::Exponential),
-                '%' => tokens.push(Token::Percent),
-                _ => {}
-            };
-        } else if NUMBER_STR.contains(ch) {
-            stor_str.push(ch);
-        } else {
-            return Err(LexerError::UnknowChar(ch));
-        }
-    }
-    // check if has the lastest number
-    if stor_str.len() > 0 {
-        match parse_num(&stor_str) {
-            Ok(num) => tokens.push(Token::Number(num)),
-            Err(e) => return Err(e),
-        };
-    }
-
-    Ok(tokens)
+pub fn tokenize<T: FromIterator<Token>>(expr_str: &str) -> Result<T, LexerError> {
+    Ok(Lexer::new(expr_str).collect()?.into_iter().collect::<T>())
 }
 
-fn parse_num(str: &str) -> Result<f64, LexerError> {
-    str.parse::<f64>().map_err(|_e| {
-        LexerError::InvalidNumber(str.to_string())
-    })
+pub struct Lexer<'a> {
+    src: Peekable<Chars<'a>>,
+}
+
+impl<'a> Lexer<'a> {
+    pub fn new(src: &'a str) -> Self {
+        Self {
+            src: src.chars().peekable(),
+        }
+    }
+
+    pub fn read(&mut self) -> Result<Token, LexerError> {
+        if let Some(ch) = self.src.next() {
+            match ch {
+                '(' => Ok(Token::OpenPh),
+                ')' => Ok(Token::ClosePh),
+                '+' => Ok(Token::Plus),
+                '-' => Ok(Token::Minus),
+                '*' => Ok(Token::Multiply),
+                '/' => Ok(Token::Division),
+                '^' => Ok(Token::Exponential),
+                '%' => Ok(Token::Percent),
+                _ if NUMBER_CHARS.contains(ch) => {
+                    let mut buf = String::from(ch);
+                    while let Some(ch) = self.src.peek().filter(|ch| NUMBER_CHARS.contains(**ch)) {
+                        buf.push(*ch);
+                        self.src.next();
+                    }
+                    Ok(Token::Number(buf.parse::<f64>().map_err(|_| LexerError::InvalidNumber(buf))?))
+                }
+                _ => {
+                    Err(LexerError::UnknowChar(ch))
+                }
+            }
+        } else {
+            Ok(Token::EOF)
+        }
+    }
+
+    pub fn collect(mut self) -> Result<Vec<Token>, LexerError> {
+        let mut tokens = vec![];
+        loop {
+            let token = self.read()?;
+            if let Token::EOF = token {
+                break;
+            }
+            tokens.push(token);
+        }
+        Ok(tokens.into_iter().collect())
+    }
 }

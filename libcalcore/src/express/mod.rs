@@ -13,8 +13,8 @@ pub mod tests {
         let valid_express = "1+2*3/4+(1%4)^1.2";
         let invalid_express = "1+2.2.2";
 
-        let valid_tokens = get_token(valid_express);
-        let invalid_tokens = get_token(invalid_express);
+        let valid_tokens = tokenize::<Vec<Token>>(valid_express);
+        let invalid_tokens = tokenize::<Vec<Token>>(invalid_express);
 
         println!("Valid_tokens: [{:?}]", valid_tokens);
         println!("Invalid_tokens: [{:?}]", invalid_tokens);
@@ -27,7 +27,7 @@ pub mod tests {
     fn test_parser() {
         let express = "1+2/3*4+(1%4)^1.2";
 
-        let lexer_res = get_token(express);
+        let lexer_res = tokenize(express);
 
         println!("Lexer: [{:?}]", lexer_res);
 
