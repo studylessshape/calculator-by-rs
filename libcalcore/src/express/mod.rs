@@ -34,11 +34,11 @@ pub mod tests {
         assert!(lexer_res.is_ok());
 
         if let Ok(lexer) = lexer_res {
-            let parser_res = Parser::parse_token(lexer);
+            let parser_res = AST::parse(lexer);
             println!("Parser: {:?}", parser_res);
 
             if let Ok(parser) = parser_res {
-                let cal_res = parser.calculate();
+                let cal_res = parser.eval();
 
                 println!("Calculator: [{:?}]", cal_res);
 
