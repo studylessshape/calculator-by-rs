@@ -1,6 +1,0 @@
-{
-    "rust-analyzer.linkedProjects": [
-        ".\\libcalcore\\Cargo.toml",
-        ".\\libcalcore\\Cargo.toml"
-    ]
-}
