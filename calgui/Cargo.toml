@@ -9,3 +9,6 @@ authors = ["StudyLessShape"]
 [dependencies]
 rand = "0.8"
 slint = "1.1.1"
+
+[build-dependencies]
+slint-build = "*"
