@@ -10,9 +10,10 @@
 // 1 2 3 * / →
 // 0 . ^ ( ) =
 
-import { TextLineEdit } from "widgets.slint";
-import { ColoSchemes as Schemes, Palette } from "styling.slint";
+import { TextLineEdit } from "widgets/widgets.slint";
+import { ColoSchemes as Schemes, Palette } from "widgets/styling.slint";
 import { Button , GridBox} from "std-widgets.slint";
+import { Button as SelfButton } from "widgets/widgets.slint";
 export { Schemes }
 
 component ExpressPanel inherits Rectangle {
@@ -57,7 +58,11 @@ export component CalculatorWindow inherits Window {
         HorizontalLayout {
             for line in [["7", "4", "1", "0"], ["8", "5", "2", "."],["9", "6", "3", "^"],["%", "+", "*", "("],["C", "-", "/", ")"],["D", "←", "→", "="]]: VerticalLayout {
                 for ch in line: Button {
+                    callback click(string /* press symbol */);
                     text: ch;
+                    clicked => {
+                        click(ch);
+                    }
                 }
             }
         }

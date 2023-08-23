@@ -1,0 +1,32 @@
+import { Palette } from "styling.slint";
+
+export component Button {
+    callback clicked <=> i-touch-area.clicked;
+
+    in property <bool> enabled <=> i-touch-area.enabled;
+    in-out property <string> text <=> i-text.text;
+    
+    Rectangle {
+        background: Palette.surface;
+        drop-shadow-color: Palette.shadow;
+        drop-shadow-blur: 2px;
+        drop-shadow-offset-y: 1px;
+        opacity: 0.9;
+    }
+    GridLayout {
+        padding: 4px;
+        i-text := Text {
+        }
+    }
+
+    i-touch-area := TouchArea {}
+
+    states [
+        disabled when !root.enabled : {
+            opacity: 0.25;
+        }
+        pressed when i-touch-area.pressed : {
+
+        }
+    ]
+}
