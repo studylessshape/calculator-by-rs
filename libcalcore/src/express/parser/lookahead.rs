@@ -98,6 +98,7 @@ impl<I: Iterator<Item = char>> LookAhead<I> {
     }
 
     fn parse_binop(&mut self, expr_prec: i8, mut lhs: Expr) -> Result<Expr, CalError> {
+        // The loop continues when the current operator's priority is same as the next operator's
         loop {
             let tok_prec = get_tok_prec(self.peek());
             if tok_prec < expr_prec {
@@ -109,6 +110,7 @@ impl<I: Iterator<Item = char>> LookAhead<I> {
 
             let next_prec = get_tok_prec(self.peek());
             if tok_prec < next_prec {
+                // The higher the op-priority the deeper this method recursive calls
                 rhs = self.parse_binop(tok_prec + 1, rhs)?;
             }
 
