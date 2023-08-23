@@ -5,12 +5,15 @@
 // layout:
 // =expr======
 // =======res=
-// 1 2 3 % C D
+// 7 8 9 % C D
 // 4 5 6 + - ←
-// 7 8 9 * / →
+// 1 2 3 * / →
 // 0 . ^ ( ) =
 
 import { TextLineEdit } from "widgets.slint";
+import { ColoSchemes as Schemes, Palette } from "styling.slint";
+import { Button , GridBox} from "std-widgets.slint";
+export { Schemes }
 
 component ExpressPanel inherits Rectangle {
     in-out property <string> input_text;
@@ -44,11 +47,44 @@ component ExpressPanel inherits Rectangle {
 export component CalculatorWindow inherits Window {
     min-width: 400px;
     min-height: 400px;
+    background: Palette.background;
     VerticalLayout {
         padding: 20px;
-        ExpressPanel {
+        i-express-panel := ExpressPanel {
             height: 30%;
             result-text: "res";
+        }
+        HorizontalLayout {
+            VerticalLayout {
+                for ch in ["7", "4", "1", "0"]: Button {
+                    text: ch;
+                }
+            }
+            VerticalLayout {
+                for ch in ["8", "5", "2", "."]: Button {
+                    text: ch;
+                }
+            }
+            VerticalLayout {
+                for ch in ["9", "6", "3", "^"]: Button {
+                    text: ch;
+                }
+            }
+            VerticalLayout {
+                for ch in ["%", "+", "*", "("]: Button {
+                    text: ch;
+                }
+            }
+            VerticalLayout {
+                for ch in ["C", "-", "/", ")"]: Button {
+                    text: ch;
+                }
+            }
+            VerticalLayout {
+                for ch in ["D", "←", "→", "="]: Button {
+                    text: ch;
+                }
+            }
         }
     }
 }

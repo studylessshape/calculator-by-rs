@@ -1,6 +1,8 @@
 // Copyright © SixtyFPS GmbH <info@slint.dev>
 // SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-Royalty-free-1.1 OR LicenseRef-Slint-commercial
 
+import { Palette } from "styling.slint";
+
 // Single line text input field with Material Design Outline TextField look and feel.
 export component TextLineEdit {
     callback accepted(string /* text */);
@@ -26,7 +28,7 @@ export component TextLineEdit {
             i-placeholder := Text {
                 width: 100%;
                 height: 100%;
-                color: #C4C7C5; // outline-variant
+                color: Palette.outline-variant;
                 font-size: font-size;
                 font-weight: 400;
                 visible: false;
@@ -46,7 +48,7 @@ export component TextLineEdit {
                 x: min(0px, max(parent.width - self.width, self.computed_x));
                 width: max(parent.width, self.preferred-width);
                 height: 100%;
-                color: #1C1B1F;
+                color: Palette.on-surface;
                 vertical-alignment: center;
                 font-size: 16 * 0.0625rem;
                 font-weight: 400;
