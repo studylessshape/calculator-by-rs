@@ -49,4 +49,13 @@ pub mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_lookahead_parser() {
+        use lookahead::LookAhead;
+        let mut parser = LookAhead::try_from("1+2/3*4+(1%4)^1.2").unwrap();
+        let ast = parser.parse_expr().unwrap();
+
+        assert!(f64::abs(ast.eval().unwrap() - (1.0 + 2.0 / 3.0 * 4.0 + f64::powf(1.0 % 4.0, 1.2))) < f64::EPSILON)
+    }
 }

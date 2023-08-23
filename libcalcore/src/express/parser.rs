@@ -1,4 +1,4 @@
-mod lookahead;
+pub mod lookahead;
 
 use std::fmt::Display;
 
@@ -22,15 +22,30 @@ pub enum NodeType {
     EOF,
 }
 
+#[repr(u8)]
 #[derive(Debug, PartialEq, Clone)]
 pub enum OpSymbol {
-    UnKnow,
+    Unknown,
     Add,
     Subtract,
     Multiply,
     Divide,
     Mod,
     Caret,
+}
+
+impl From<Token> for OpSymbol {
+    fn from(value: Token) -> Self {
+        match value {
+            Token::Plus => OpSymbol::Add,
+            Token::Minus => OpSymbol::Subtract,
+            Token::Multiply => OpSymbol::Multiply,
+            Token::Division => OpSymbol::Divide,
+            Token::Exponential => OpSymbol::Caret,
+            Token::Percent => OpSymbol::Mod,
+            _ => OpSymbol::Unknown,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -188,7 +203,7 @@ fn parse_expr(nodes: &mut Vec<Node>) -> Result<Node, ParserError> {
 /// AddExpr ::= MulExpr {("+"|"-") AddExpr};
 fn parse_add_expr(nodes: &mut Vec<Node>) -> Result<(), ParserError> {
     parse_mul_expr(nodes)?;
-    let mut add_node = Node::new_type(NodeType::AddExpr(OpSymbol::UnKnow));
+    let mut add_node = Node::new_type(NodeType::AddExpr(OpSymbol::Unknown));
     add_node.children.push(nodes[0].clone());
     // check if has symbol that is "+", "-"
     if let Some(node) = nodes.get(1) {
@@ -217,7 +232,7 @@ fn parse_add_expr(nodes: &mut Vec<Node>) -> Result<(), ParserError> {
 /// MulExpr ::= ExponExpr {("*"|"/"|"%") ExponExpr};
 fn parse_mul_expr(nodes: &mut Vec<Node>) -> Result<(), ParserError> {
     parse_expon_expr(nodes)?;
-    let mut mul_node = Node::new_type(NodeType::MulExpr(OpSymbol::UnKnow));
+    let mut mul_node = Node::new_type(NodeType::MulExpr(OpSymbol::Unknown));
     mul_node.children.push(nodes[0].clone());
     nodes[0] = mul_node.clone();
     // check if has symbol that is "*", "/", "%"
@@ -240,7 +255,7 @@ fn parse_mul_expr(nodes: &mut Vec<Node>) -> Result<(), ParserError> {
                     // put node in to nodes
                     nodes[0] = mul_node.clone();
                     // pack node
-                    mul_node = Node::new_type(NodeType::MulExpr(OpSymbol::UnKnow));
+                    mul_node = Node::new_type(NodeType::MulExpr(OpSymbol::Unknown));
                     mul_node.children.push(nodes[0].clone());
                 }
                 _ => break,

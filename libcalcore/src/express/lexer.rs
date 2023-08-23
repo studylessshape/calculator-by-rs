@@ -1,6 +1,6 @@
-use std::{str::Chars, iter::Peekable};
+use std::{iter::Peekable, str::Chars};
 
-use super::error::LexerError;
+use super::error::{LexerError, CalError};
 
 /// Some section about to the symbols:
 ///
@@ -22,22 +22,26 @@ pub enum Token {
 pub static NUMBER_CHARS: &str = "0123456789.";
 pub static OPERATOR_CHARS: &str = "()+-*/^% \n";
 
-pub fn tokenize<T: FromIterator<Token>>(expr_str: &str) -> Result<T, LexerError> {
-    Ok(Lexer::new(expr_str).collect()?.into_iter().collect::<T>())
+pub fn tokenize<T: FromIterator<Token>>(expr_str: &str) -> Result<T, CalError> {
+    Ok(Lexer::from(expr_str).collect()?.into_iter().collect::<T>())
 }
 
-pub struct Lexer<'a> {
-    src: Peekable<Chars<'a>>,
+pub struct Lexer<I: Iterator<Item = char>> {
+    src: Peekable<I>,
 }
 
-impl<'a> Lexer<'a> {
-    pub fn new(src: &'a str) -> Self {
-        Self {
-            src: src.chars().peekable(),
-        }
+impl<I: Iterator<Item = char>> Lexer<I> {
+    pub fn new(chars: I) -> Self {
+        Self { src: chars.peekable() }
     }
 
-    pub fn read(&mut self) -> Result<Token, LexerError> {
+    // pub fn new(src: &'a str) -> Self {
+    //     Self {
+    //         src: src.chars().peekable(),
+    //     }
+    // }
+
+    pub fn read(&mut self) -> Result<Token, CalError> {
         if let Some(ch) = self.src.next() {
             match ch {
                 '(' => Ok(Token::OpenPh),
@@ -54,10 +58,10 @@ impl<'a> Lexer<'a> {
                         buf.push(*ch);
                         self.src.next();
                     }
-                    Ok(Token::Number(buf.parse::<f64>().map_err(|_| LexerError::InvalidNumber(buf))?))
+                    Ok(Token::Number(buf.parse::<f64>().map_err(|_| CalError::LexError(LexerError::InvalidNumber(buf)))?))
                 }
                 _ => {
-                    Err(LexerError::UnknowChar(ch))
+                    CalError::lex(LexerError::UnknowChar(ch))
                 }
             }
         } else {
@@ -65,7 +69,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn collect(mut self) -> Result<Vec<Token>, LexerError> {
+    pub fn collect(mut self) -> Result<Vec<Token>, CalError> {
         let mut tokens = vec![];
         loop {
             let token = self.read()?;
@@ -74,6 +78,12 @@ impl<'a> Lexer<'a> {
             }
             tokens.push(token);
         }
-        Ok(tokens.into_iter().collect())
+        Ok(tokens)
+    }
+}
+
+impl<'a> From<&'a str> for Lexer<Chars<'a>> {
+    fn from(value: &'a str) -> Self {
+        Self::new(value.chars())
     }
 }
