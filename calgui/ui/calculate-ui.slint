@@ -55,33 +55,8 @@ export component CalculatorWindow inherits Window {
             result-text: "res";
         }
         HorizontalLayout {
-            VerticalLayout {
-                for ch in ["7", "4", "1", "0"]: Button {
-                    text: ch;
-                }
-            }
-            VerticalLayout {
-                for ch in ["8", "5", "2", "."]: Button {
-                    text: ch;
-                }
-            }
-            VerticalLayout {
-                for ch in ["9", "6", "3", "^"]: Button {
-                    text: ch;
-                }
-            }
-            VerticalLayout {
-                for ch in ["%", "+", "*", "("]: Button {
-                    text: ch;
-                }
-            }
-            VerticalLayout {
-                for ch in ["C", "-", "/", ")"]: Button {
-                    text: ch;
-                }
-            }
-            VerticalLayout {
-                for ch in ["D", "←", "→", "="]: Button {
+            for line in [["7", "4", "1", "0"], ["8", "5", "2", "."],["9", "6", "3", "^"],["%", "+", "*", "("],["C", "-", "/", ")"],["D", "←", "→", "="]]: VerticalLayout {
+                for ch in line: Button {
                     text: ch;
                 }
             }
