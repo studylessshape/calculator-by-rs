@@ -1,0 +1,50 @@
+import { StandardButton } from "std-widgets.slint";
+export component Message {
+    in-out property <bool> is-visible: true;
+    in property <string> title <=> i-title-text.text;
+    in-out property <string> content <=> i-content-text.text;
+
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        // opacity: 0.3;
+        background: #00000065;
+        TouchArea {}
+    }
+
+    Rectangle {
+        width: 300px;
+        height: 200px;
+        background: #e9e9e9;
+        border-radius: 5px;
+        VerticalLayout {
+            padding: 20px;
+            horizontal-stretch: 1;
+            i-title-text:=Text {
+                font-size: 26px;
+                horizontal-alignment: center;
+            }
+            i-content-text:=Text {
+                font-size: 20px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+            HorizontalLayout {
+                StandardButton {
+                    clicked => {
+                        root.is-visible = false;
+                    }
+                }
+            }
+        }
+    }
+
+    states [
+        enable when is-visible: {
+            visible: true;
+        }
+        disable when !is-visible: {
+            visible: false;
+        }
+    ]
+}

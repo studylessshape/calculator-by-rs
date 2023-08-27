@@ -1,4 +1,4 @@
-use slint::{Model, SharedString};
+use slint::SharedString;
 use libcalcore::express::error::CalError;
 
 slint::include_modules!();
