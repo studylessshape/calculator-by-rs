@@ -16,6 +16,7 @@ export component TextLineEdit {
     in property read-only <=> i-text-input.read-only;
     out property <bool> has-focus: i-text-input.has-focus;
     in-out property <string> text <=> i-text-input.text;
+    in-out property <length> cursor_pos <=> i-text-input.computed_x;
 
     min-width: max(42px, i-layout.min-width);
     min-height: max(20px, i-layout.min-height);

@@ -12,13 +12,13 @@
 
 import { TextLineEdit } from "widgets/widgets.slint";
 import { ColoSchemes as Schemes, Palette } from "widgets/styling.slint";
-import { Button , GridBox} from "std-widgets.slint";
-import { Button as SelfButton } from "widgets/widgets.slint";
+import { Button , GridBox, StandardButton} from "std-widgets.slint";
 export { Schemes }
 
 component ExpressPanel inherits Rectangle {
     in-out property <string> input_text;
     in-out property <string> result_text;
+    in-out property <length> cursor_pos <=> i-text-input.cursor-pos;
 
     border-width: 2px;
     border-radius: 5px;
@@ -30,7 +30,7 @@ component ExpressPanel inherits Rectangle {
         i-text-input := TextLineEdit {
             placeholder-text: "请输入算术式...";
             text: input_text;
-            font-size: 18px;
+            font-size: 20px;
         }
         TouchArea {
             i-text-result := TextLineEdit {
@@ -45,26 +45,103 @@ component ExpressPanel inherits Rectangle {
     }
 }
 
-export component CalculatorWindow inherits Window {
-    min-width: 400px;
-    min-height: 400px;
-    background: Palette.background;
-    VerticalLayout {
-        padding: 20px;
-        i-express-panel := ExpressPanel {
-            height: 30%;
-            result-text: "res";
-        }
-        HorizontalLayout {
-            for line in [["7", "4", "1", "0"], ["8", "5", "2", "."],["9", "6", "3", "^"],["%", "+", "*", "("],["C", "-", "/", ")"],["D", "←", "→", "="]]: VerticalLayout {
-                for ch in line: Button {
-                    callback click(string /* press symbol */);
-                    text: ch;
+struct ButtonData {
+    character: string,
+}
+
+component Message {
+    in-out property <bool> is-visible: true;
+    in property <string> title <=> i-title-text.text;
+    in-out property <string> content <=> i-content-text.text;
+
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        // opacity: 0.3;
+        background: #00000065;
+        TouchArea {}
+    }
+
+    Rectangle {
+        width: 300px;
+        height: 200px;
+        background: #e9e9e9;
+        border-radius: 5px;
+        VerticalLayout {
+            padding: 20px;
+            horizontal-stretch: 1;
+            i-title-text:=Text {
+                font-size: 26px;
+                horizontal-alignment: center;
+            }
+            i-content-text:=Text {
+                font-size: 20px;
+                horizontal-alignment: center;
+                wrap: word-wrap;
+            }
+            HorizontalLayout {
+                StandardButton {
                     clicked => {
-                        click(ch);
+                        root.is-visible = false;
                     }
                 }
             }
         }
+    }
+
+    states [
+        enable when is-visible: {
+            visible: true;
+        }
+        disable when !is-visible: {
+            visible: false;
+        }
+    ]
+}
+
+export component CalculatorWindow inherits Window {
+    callback clicked_button(string);
+
+    in-out property <string> result <=> i-express-panel.result-text;
+    in-out property <string> express <=> i-express-panel.input_text;
+    in-out property <length> cursor-pos <=> i-express-panel.cursor-pos;
+    in-out property <bool> show-message <=> i-message.is-visible;
+    in-out property <string> message-title <=> i-message.title;
+    in-out property <string> message-content <=> i-message.content;
+
+    min-width: 400px;
+    min-height: 400px;
+    background: Palette.background;
+
+    in-out property <[[string]]> button_chars: [
+        ["7", "4", "1", "0"], 
+        ["8", "5", "2", "."],
+        ["9", "6", "3", "^"],
+        ["%", "+", "*", "("],
+        ["C", "-", "/", ")"],
+        ["D", "←", "→", "="]
+    ];
+
+    VerticalLayout {
+        padding: 20px;
+        i-express-panel := ExpressPanel {
+            height: 30%;
+        }
+        HorizontalLayout {
+            for line in button_chars: VerticalLayout {
+                for ch in line: Button {
+                    text: ch;
+                    clicked => {
+                        root.clicked_button(ch);
+                    }
+                }
+            }
+        }
+    }
+
+    i-message:=Message {
+        width: 100%;
+        height: 100%;
+        is-visible: false;
     }
 }
